@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "mise-en-place",
+  "productName": "Mise en Place",
   "version": "0.1.0",
-  "identifier": "com.taylordrayson.mise-en-place",
+  "identifier": "com.tdrayson.mise-en-place",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5174",

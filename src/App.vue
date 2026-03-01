@@ -65,6 +65,7 @@ import { useAudioAlert } from "./composables/useAudioAlert.js";
 import { useCookingSchedule } from "./composables/useCookingSchedule.js";
 import { useTimer } from "./composables/useTimer.js";
 import { useSettings } from "./composables/useSettings.js";
+import { buildSchedule } from "./utils/buildSchedule.js";
 
 const isDev = import.meta.env.DEV;
 const input = ref("");
@@ -109,7 +110,7 @@ function openSettings() {
 async function handleSubmit() {
   const parsed = await analyseInput(input.value);
   if (parsed) {
-    items.value = parsed;
+    items.value = buildSchedule(parsed);
     phase.value = "ready";
   }
 }
