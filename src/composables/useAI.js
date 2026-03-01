@@ -1,20 +1,18 @@
 import { ref } from "vue";
 import { SYSTEM_PROMPT } from "../constants/prompts.js";
+import { useSettings } from "./useSettings.js";
 
-const provider = import.meta.env.VITE_AI_PROVIDER || "anthropic";
-const model = import.meta.env.VITE_AI_MODEL || "claude-sonnet-4-20250514";
-
-function buildAnthropicRequest(input) {
+function buildAnthropicRequest(input, currentModel, currentApiKey) {
   return {
     url: "https://api.anthropic.com/v1/messages",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
+      "x-api-key": currentApiKey,
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: {
-      model,
+      model: currentModel,
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: input }],
@@ -25,15 +23,15 @@ function buildAnthropicRequest(input) {
   };
 }
 
-function buildOpenAIRequest(input) {
+function buildOpenAIRequest(input, currentModel, currentApiKey) {
   return {
     url: "https://api.openai.com/v1/chat/completions",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+      Authorization: `Bearer ${currentApiKey}`,
     },
     body: {
-      model,
+      model: currentModel,
       max_completion_tokens: 16384,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -47,8 +45,9 @@ function buildOpenAIRequest(input) {
 }
 
 function buildRequest(input) {
-  if (provider === "openai") return buildOpenAIRequest(input);
-  return buildAnthropicRequest(input);
+  const { provider, model, apiKey } = useSettings();
+  if (provider.value === "openai") return buildOpenAIRequest(input, model.value, apiKey.value);
+  return buildAnthropicRequest(input, model.value, apiKey.value);
 }
 
 export function useAI() {

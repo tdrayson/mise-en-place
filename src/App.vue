@@ -1,7 +1,19 @@
 <template>
-  <AppHeader :showReset="phase !== 'input'" @reset="resetAll" />
+  <AppHeader
+    :showReset="phase !== 'input' && phase !== 'setup'"
+    :showSettings="phase === 'input'"
+    @reset="resetAll"
+    @openSettings="openSettings"
+  />
 
   <div class="content">
+    <SettingsScreen
+      v-if="phase === 'setup'"
+      :showCancel="hasBeenConfigured"
+      @saved="phase = 'input'"
+      @cancel="phase = 'input'"
+    />
+
     <MealInput
       v-if="phase === 'input'"
       v-model="input"
@@ -43,6 +55,7 @@
 <script setup>
 import { ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
+import SettingsScreen from "./components/SettingsScreen.vue";
 import MealInput from "./components/MealInput.vue";
 import CookingPlan from "./components/CookingPlan.vue";
 import ActiveTimer from "./components/ActiveTimer.vue";
@@ -51,11 +64,15 @@ import { useAI } from "./composables/useAI.js";
 import { useAudioAlert } from "./composables/useAudioAlert.js";
 import { useCookingSchedule } from "./composables/useCookingSchedule.js";
 import { useTimer } from "./composables/useTimer.js";
+import { useSettings } from "./composables/useSettings.js";
 
 const isDev = import.meta.env.DEV;
 const input = ref("");
 const items = ref([]);
-const phase = ref("input");
+
+const { isConfigured } = useSettings();
+const hasBeenConfigured = ref(isConfigured.value);
+const phase = ref(isConfigured.value ? "input" : "setup");
 
 const { loading, error, analyseInput } = useAI();
 const { beep, notifyUser } = useAudioAlert();
@@ -83,6 +100,11 @@ const {
     notifyUser("Mise en Place", `Now: ${nextItem.name} — ${nextItem.method}`);
   },
 });
+
+function openSettings() {
+  hasBeenConfigured.value = isConfigured.value;
+  phase.value = "setup";
+}
 
 async function handleSubmit() {
   const parsed = await analyseInput(input.value);

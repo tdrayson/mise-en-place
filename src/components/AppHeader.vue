@@ -4,18 +4,26 @@
       <span class="title">MISE EN PLACE</span>
       <span class="subtitle">cooking timer</span>
     </div>
-    <button v-if="showReset" class="reset-btn" @click="$emit('reset')">
-      &larr; NEW MEAL
-    </button>
+    <div class="actions">
+      <button v-if="showSettings" class="icon-btn" @click="$emit('openSettings')" aria-label="Settings">
+        <Settings :size="18" />
+      </button>
+      <button v-if="showReset" class="reset-btn" @click="$emit('reset')">
+        &larr; NEW MEAL
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { Settings } from "lucide-vue-next";
+
 defineProps({
   showReset: Boolean,
+  showSettings: Boolean,
 });
 
-defineEmits(["reset"]);
+defineEmits(["reset", "openSettings"]);
 </script>
 
 <style scoped>
@@ -48,6 +56,27 @@ defineEmits(["reset"]);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   line-height: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
 }
 
 .reset-btn {
