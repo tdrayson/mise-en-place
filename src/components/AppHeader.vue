@@ -5,9 +5,6 @@
       <span class="subtitle">cooking timer</span>
     </div>
     <div class="actions">
-      <button v-if="showSettings" class="icon-btn" @click="$emit('openSettings')" aria-label="Settings">
-        <Settings :size="18" />
-      </button>
       <button v-if="showReset" class="reset-btn" @click="$emit('reset')">
         &larr; NEW MEAL
       </button>
@@ -16,14 +13,11 @@
 </template>
 
 <script setup>
-import { Settings } from "lucide-vue-next";
-
 defineProps({
   showReset: Boolean,
-  showSettings: Boolean,
 });
 
-defineEmits(["reset", "openSettings"]);
+defineEmits(["reset"]);
 </script>
 
 <style scoped>
@@ -62,21 +56,6 @@ defineEmits(["reset", "openSettings"]);
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  transition: color 0.2s;
-}
-
-.icon-btn:hover {
-  color: var(--text-primary);
 }
 
 .reset-btn {

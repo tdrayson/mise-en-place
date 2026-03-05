@@ -15,11 +15,13 @@ Built with Vue 3 + Tauri v2.
 
 ## Download
 
-Grab the latest `.dmg` from [Releases](https://github.com/taylordrayson/mise-en-place/releases), open it, and drag the app to Applications. On first launch you'll be prompted to enter your AI provider, model, and API key.
+Grab the latest `.dmg` from [Releases](https://github.com/taylordrayson/mise-en-place/releases), open it, and drag the app to Applications.
 
-You'll need an API key from [Anthropic](https://console.anthropic.com/) or [OpenAI](https://platform.openai.com/). For this use case (parsing text into structured JSON), cheaper/faster models work great — `gpt-4o-mini` or `gpt-4.1-nano` are recommended.
+The AI runs entirely in your browser using [WebLLM](https://github.com/mlc-ai/web-llm) — no API keys, no server, no cost. The model downloads and caches on first launch (~600MB).
 
 > **Note:** The app isn't code-signed, so macOS will show a warning. Right-click the app and choose "Open" the first time.
+
+> **Note:** WebLLM requires a browser with WebGPU support (Chrome 113+, Edge 113+).
 
 ## Development
 
@@ -35,26 +37,6 @@ git clone https://github.com/taylordrayson/mise-en-place.git
 cd mise-en-place
 npm install
 ```
-
-### Configure (optional)
-
-To skip the settings screen during development, create a `.env.development` file in the project root:
-
-```env
-# Provider: "anthropic" or "openai"
-VITE_AI_PROVIDER=openai
-
-# Model (e.g. gpt-4o-mini, gpt-4.1-nano, claude-sonnet-4-20250514)
-VITE_AI_MODEL=gpt-4o-mini
-
-# API keys — only the one matching your provider is needed
-VITE_ANTHROPIC_API_KEY=sk-ant-...
-VITE_OPENAI_API_KEY=sk-...
-```
-
-This file is gitignored and only loaded in dev mode — production builds won't include your keys.
-
-Without a `.env.development` file, the in-app settings screen will appear on first launch instead.
 
 ### Run
 
@@ -79,15 +61,13 @@ src/
 ├── main.js                        # Vue app entry
 ├── style.css                      # CSS variables, light/dark mode
 ├── components/
-│   ├── AppHeader.vue              # Logo + settings gear + reset button
-│   ├── SettingsScreen.vue         # AI provider/model/key configuration
+│   ├── AppHeader.vue              # Logo + reset button
 │   ├── MealInput.vue              # Text input + loading state
 │   ├── CookingPlan.vue            # Timeline view of the plan
 │   ├── ActiveTimer.vue            # Countdown + queue
 │   └── CompletedScreen.vue        # Done screen
 ├── composables/
-│   ├── useSettings.js             # Settings persistence (localStorage + env fallback)
-│   ├── useAI.js                   # Anthropic/OpenAI API calls
+│   ├── useAI.js                   # Local LLM via WebLLM
 │   ├── useAudioAlert.js           # Web Audio beep + macOS notifications
 │   ├── useCookingSchedule.js      # Timeline offset calculations
 │   └── useTimer.js                # Countdown logic
@@ -100,14 +80,13 @@ src/
 
 ## Features
 
-- In-app settings — configure your AI provider on first launch, no `.env` needed
-- Supports both Anthropic (Claude) and OpenAI APIs
+- Runs entirely locally — no API keys, no cloud services, no cost
+- Uses WebLLM to run an LLM directly in the browser via WebGPU
 - Smart preheating — one preheat per appliance, timed just before it's needed
 - Staggered timing so all food finishes together
 - Audio beeps on step transitions
 - macOS system notifications (via Tauri)
 - Light and dark mode (follows system preference)
-- Settings persist across sessions via localStorage
 
 ## License
 

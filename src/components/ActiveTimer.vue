@@ -10,10 +10,7 @@
     <!-- Active timer -->
     <div v-if="currentItem" class="timer-display">
       <div class="now-label">{{ currentItem.type === 'preheat' ? 'Preheating' : 'Now cooking' }}</div>
-      <div class="current-name">
-        <component :is="methodIcon(currentItem.method)" :size="20" :stroke-width="1.5" class="current-icon" />
-        {{ currentItem.name }}
-      </div>
+      <div class="current-name">{{ currentItem.name }}</div>
       <div class="current-method">{{ currentItem.method }}</div>
 
       <div
@@ -75,7 +72,7 @@
 <script setup>
 import { computed } from "vue";
 import { formatTime, formatDuration } from "../utils/formatTime.js";
-import { methodIcon } from "../utils/methodIcon.js";
+
 
 const props = defineProps({
   items: Array,
@@ -142,14 +139,6 @@ const currentItem = computed(() => props.items[props.activeIndex]);
   font-size: 19px;
   color: var(--text-primary);
   margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.current-icon {
-  color: var(--accent-gold);
 }
 
 .current-method {
