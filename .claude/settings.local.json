@@ -10,7 +10,19 @@
       "Bash(lsof:*)",
       "Bash(kill 30865:*)",
       "Bash(python3:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(npx vite:*)",
+      "Bash(cargo search:*)",
+      "Bash(cargo info:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(brew install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(MACOSX_DEPLOYMENT_TARGET=10.15 npm run:*)",
+      "Bash(cargo clean:*)",
+      "Bash(git remote:*)",
+      "Bash(gh run:*)"
     ]
   }
 }
