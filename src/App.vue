@@ -111,6 +111,7 @@ async function handleSubmit() {
   const parsed = await analyseInput(input.value);
   if (parsed) {
     items.value = buildSchedule(parsed);
+    console.log("Scheduled steps:", JSON.parse(JSON.stringify(items.value)));
     phase.value = "ready";
   }
 }

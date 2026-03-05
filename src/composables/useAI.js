@@ -38,6 +38,7 @@ export function useAI() {
       if (!text) throw new Error("Empty response from API");
       const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
       if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("No items found");
+      console.log("AI response (parsed items):", JSON.parse(JSON.stringify(parsed)));
       return parsed;
     } catch (e) {
       console.error("AI error:", e);
