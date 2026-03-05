@@ -1,8 +1,4 @@
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification,
-} from "@tauri-apps/plugin-notification";
+const isTauri = !!window.__TAURI_INTERNALS__;
 
 export function useAudioAlert() {
   function beep() {
@@ -27,17 +23,30 @@ export function useAudioAlert() {
   }
 
   async function notifyUser(title, body) {
-    try {
-      let granted = await isPermissionGranted();
-      if (!granted) {
-        const permission = await requestPermission();
-        granted = permission === "granted";
+    if (isTauri) {
+      try {
+        const { isPermissionGranted, requestPermission, sendNotification } =
+          await import("@tauri-apps/plugin-notification");
+        let granted = await isPermissionGranted();
+        if (!granted) {
+          const permission = await requestPermission();
+          granted = permission === "granted";
+        }
+        if (granted) {
+          sendNotification({ title, body });
+        }
+      } catch (e) {
+        // fallback silently
       }
-      if (granted) {
-        sendNotification({ title, body });
+    } else if ("Notification" in window) {
+      if (Notification.permission === "granted") {
+        new Notification(title, { body });
+      } else if (Notification.permission !== "denied") {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          new Notification(title, { body });
+        }
       }
-    } catch (e) {
-      // ignore notification errors (e.g. in browser dev mode)
     }
   }
 
