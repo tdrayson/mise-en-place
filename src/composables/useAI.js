@@ -1,65 +1,6 @@
 import { ref } from "vue";
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-
-const modelReady = ref(false);
-const modelLoading = ref(false);
-const modelError = ref("");
-const loadProgress = ref("");
-const modelCached = ref(false);
-
-// Check if model is already downloaded
-invoke("model_status").then((status) => {
-  modelCached.value = status === "ready";
-  if (modelCached.value) {
-    loadModel();
-  }
-});
-
-async function loadModel() {
-  modelLoading.value = true;
-  modelError.value = "";
-  loadProgress.value = "Loading model...";
-  try {
-    await invoke("load_model");
-    modelReady.value = true;
-  } catch (e) {
-    modelError.value = String(e);
-  } finally {
-    modelLoading.value = false;
-  }
-}
-
-async function startModelLoad() {
-  modelLoading.value = true;
-  modelError.value = "";
-  loadProgress.value = "Starting download...";
-
-  const unlisten = await listen("download-progress", (event) => {
-    const { downloaded, total } = event.payload;
-    if (total) {
-      const pct = Math.round((downloaded / total) * 100);
-      const mb = (downloaded / 1024 / 1024).toFixed(0);
-      const totalMb = (total / 1024 / 1024).toFixed(0);
-      loadProgress.value = `Downloading model... ${mb} / ${totalMb} MB (${pct}%)`;
-    } else {
-      const mb = (downloaded / 1024 / 1024).toFixed(0);
-      loadProgress.value = `Downloading model... ${mb} MB`;
-    }
-  });
-
-  try {
-    await invoke("download_model");
-    unlisten();
-    loadProgress.value = "Loading model...";
-    await invoke("load_model");
-    modelReady.value = true;
-  } catch (e) {
-    modelError.value = String(e);
-  } finally {
-    modelLoading.value = false;
-  }
-}
+import { SYSTEM_PROMPT } from "../constants/prompts.js";
+import { useSettings } from "./useSettings.js";
 
 export function useAI() {
   const loading = ref(false);
@@ -70,9 +11,34 @@ export function useAI() {
     loading.value = true;
     error.value = "";
     try {
-      const items = await invoke("analyse_input", { input });
-      if (!items || items.length === 0) throw new Error("No items found");
-      return items;
+      const { apiKey } = useSettings();
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey.value,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: "user", content: input }],
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || `API returned ${res.status}`);
+      }
+
+      const text = data.content?.[0]?.text || "";
+      if (!text) throw new Error("Empty response from API");
+      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("No items found");
+      return parsed;
     } catch (e) {
       console.error("AI error:", e);
       error.value = "Couldn't parse that — try describing each item with its time and cooking method.";
@@ -82,5 +48,5 @@ export function useAI() {
     }
   }
 
-  return { loading, error, analyseInput, modelReady, modelLoading, modelError, loadProgress, modelCached, startModelLoad };
+  return { loading, error, analyseInput };
 }
